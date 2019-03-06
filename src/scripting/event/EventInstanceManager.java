@@ -229,7 +229,11 @@ public class EventInstanceManager {
                 
 	}
 
-	public synchronized void registerPlayer(final MapleCharacter chr) {
+        public synchronized void registerPlayer(final MapleCharacter chr) {
+                registerPlayer(chr, true);
+        }
+        
+	public synchronized void registerPlayer(final MapleCharacter chr, boolean runEntryScript) {
 		if (chr == null || !chr.isLoggedinWorld() || disposed) {
 			return;
 		}
@@ -246,10 +250,12 @@ public class EventInstanceManager {
                         wL.unlock();
                 }
                 
-                try {
-                        em.getIv().invokeFunction("playerEntry", EventInstanceManager.this, chr);
-                } catch (ScriptException | NoSuchMethodException ex) {
-                        ex.printStackTrace();
+                if (runEntryScript) {
+                        try {
+                                em.getIv().invokeFunction("playerEntry", EventInstanceManager.this, chr);
+                        } catch (ScriptException | NoSuchMethodException ex) {
+                                ex.printStackTrace();
+                        }
                 }
 	}  
         
@@ -372,7 +378,7 @@ public class EventInstanceManager {
         private void registerExpeditionTeam(MapleExpedition exped, int recruitMap) {
 		expedition = exped;
                 
-                for (MapleCharacter chr: exped.getMembers()) {
+                for (MapleCharacter chr: exped.getActiveMembers()) {
                         if (chr.getMapId() == recruitMap) {
                                 registerPlayer(chr);
                         }
@@ -602,7 +608,6 @@ public class EventInstanceManager {
                         ex.printStackTrace();
                 }
                 
-                mapFactory.dispose();
                 ess.dispose();
                 
                 wL.lock();
@@ -610,7 +615,6 @@ public class EventInstanceManager {
                         for(MapleCharacter chr: chars.values()) chr.setEventInstance(null);
                         chars.clear();
                         mobs.clear();
-                        mapFactory = null;
                         ess = null;
                 } finally {
                         wL.unlock();
@@ -630,12 +634,25 @@ public class EventInstanceManager {
                 sL.lock();
                 try {
                         if(!eventCleared) em.disposeInstance(name);
-                        em = null;
                 } finally {
                         sL.unlock();
                 }
                 
-                disposeLocks();
+                TimerManager.getInstance().schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                                mapFactory.dispose();   // issues from instantly disposing some event objects found thanks to MedicOP
+                                wL.lock();
+                                try {
+                                        mapFactory = null;
+                                        em = null;
+                                } finally {
+                                        wL.unlock();
+                                }
+
+                                disposeLocks();
+                        }
+                }, 60 * 1000);
 	}
         
         private void disposeLocks() {
@@ -664,7 +681,6 @@ public class EventInstanceManager {
                                         @Override
                                         public void run() {
                                                 try {
-                                                        if(em == null) return;
                                                         em.getIv().invokeFunction(methodName, EventInstanceManager.this);
                                                 } catch (ScriptException | NoSuchMethodException ex) {
                                                         ex.printStackTrace();
@@ -681,31 +697,6 @@ public class EventInstanceManager {
 
 	public String getName() {
 		return name;
-	}
-
-	public void saveWinner(MapleCharacter chr) {
-                String emName;
-                sL.lock();
-                try {
-                       emName = em.getName();
-                } finally {
-                        sL.unlock();
-                }
-            
-		try {
-                        Connection con = DatabaseConnection.getConnection();
-			try (PreparedStatement ps = con.prepareStatement("INSERT INTO eventstats (event, instance, characterid, channel) VALUES (?, ?, ?, ?)")) {
-				ps.setString(1, emName);
-				ps.setString(2, getName());
-				ps.setInt(3, chr.getId());
-				ps.setInt(4, chr.getClient().getChannel());
-				ps.executeUpdate();
-			}
-                        
-                        con.close();
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-		}
 	}
 
 	public MapleMap getMapInstance(int mapId) {

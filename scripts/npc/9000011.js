@@ -46,10 +46,10 @@ function action(mode, type, selection) {
 				var dat = parseInt(marr.getCustomData());
 				if (dat + 3600000 >= cm.getCurrentTime()) {
 					cm.sendNext("You've entered the event already in the past hour.");
-				} else if (!cm.canHold()) {
+				} else if (!cm.canHold(4031019)) {
 					cm.sendNext("Save up some space in your inventory.");
 				} else if (cm.getChannelServer().getEvent() > -1 && !cm.haveItem(4031019)) {
-					cm.saveReturnLocation("EVENT");
+					cm.getPlayer().saveLocation("EVENT");
 					cm.getPlayer().setChalkboard(null);
 					marr.setCustomData("" + cm.getCurrentTime());
 					cm.warp(cm.getChannelServer().getEvent(), cm.getChannelServer().getEvent() == 109080000 || cm.getChannelServer().getEvent() == 109080010 ? 0 : "join00");

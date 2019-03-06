@@ -41,7 +41,6 @@ public final class ItemConstants {
     public final static int COLD = 0x04;
     public final static int UNTRADEABLE = 0x08;
     public final static int KARMA_EQP = 0x10;
-    public final static int KARMA_UNTRADEABLE = 0x20;   // let 0x20 until it's proven something uses this
     public final static int SANDBOX = 0x40;             // let 0x40 until it's proven something uses this
     public final static int PET_COME = 0x80;
     public final static int ACCOUNT_SHARING = 0x100;
@@ -144,6 +143,10 @@ public final class ItemConstants {
         return scrollId > 2048999 && scrollId < 2049004;
     }
     
+    public static boolean isModifierScroll(int scrollId) {
+        return scrollId == 2040727 || scrollId == 2041058;
+    }
+    
     public static boolean isFlagModifier(int scrollId, byte flag) {
         if(scrollId == 2041058 && ((flag & ItemConstants.COLD) == ItemConstants.COLD)) return true;
         if(scrollId == 2040727 && ((flag & ItemConstants.SPIKES) == ItemConstants.SPIKES)) return true;
@@ -214,7 +217,7 @@ public final class ItemConstants {
     }
 
     public static boolean isWeapon(int itemId) {
-        return itemId >= 1302000 && itemId < 1492024;
+        return itemId >= 1302000 && itemId < 1493000;
     }
     
     public static boolean isEquipment(int itemId) {
@@ -231,5 +234,13 @@ public final class ItemConstants {
     
     public static boolean isWeddingToken(int itemId) {
         return itemId >= 4031357 && itemId <= 4031364;
+    }
+    
+    public static boolean isFace(int itemId) {
+        return itemId >= 20000 && itemId < 22000;
+    }
+    
+    public static boolean isHair(int itemId) {
+        return itemId >= 30000 && itemId < 35000;
     }
 }

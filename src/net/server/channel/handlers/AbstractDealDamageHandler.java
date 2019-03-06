@@ -60,6 +60,7 @@ import constants.ServerConstants;
 import constants.skills.Aran;
 import constants.skills.Assassin;
 import constants.skills.Bandit;
+import constants.skills.Beginner;
 import constants.skills.Bishop;
 import constants.skills.BlazeWizard;
 import constants.skills.Bowmaster;
@@ -83,10 +84,12 @@ import constants.skills.Hero;
 import constants.skills.Hunter;
 import constants.skills.ILArchMage;
 import constants.skills.ILMage;
+import constants.skills.Legend;
 import constants.skills.Marauder;
 import constants.skills.Marksman;
 import constants.skills.NightLord;
 import constants.skills.NightWalker;
+import constants.skills.Noblesse;
 import constants.skills.Outlaw;
 import constants.skills.Page;
 import constants.skills.Paladin;
@@ -271,7 +274,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                         totDamageToOneMonster += eachd;
                     }
                     totDamage += totDamageToOneMonster;
-                    player.checkMonsterAggro(monster);
+                    monster.aggroMonsterDamage(player, totDamageToOneMonster);
                     if (player.getBuffedValue(MapleBuffStat.PICKPOCKET) != null && (attack.skill == 0 || attack.skill == Rogue.DOUBLE_STAB || attack.skill == Bandit.SAVAGE_BLOW || attack.skill == ChiefBandit.ASSAULTER || attack.skill == ChiefBandit.BAND_OF_THIEVES || attack.skill == Shadower.ASSASSINATE || attack.skill == Shadower.TAUNT || attack.skill == Shadower.BOOMERANG_STEP)) {
                         Skill pickpocket = SkillFactory.getSkill(ChiefBandit.PICKPOCKET);
                         int picklv = (player.isGM()) ? pickpocket.getMaxLevel() : player.getSkillLevel(pickpocket);
@@ -725,7 +728,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
         if(chr.getEnergyBar() == 15000) {
             int energycharge = chr.isCygnus() ? ThunderBreaker.ENERGY_CHARGE : Marauder.ENERGY_CHARGE;
             MapleStatEffect ceffect = SkillFactory.getSkill(energycharge).getEffect(chr.getSkillLevel(energycharge));
-            calcDmgMax *= ceffect.getDamage() / 100;
+            calcDmgMax *= (100 + ceffect.getDamage()) / 100;
         }
         
         if(chr.getMapId() >= 914000000 && chr.getMapId() <= 914000500) {
@@ -820,13 +823,20 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                             if(monster != null) {
                                     monster.debuffMob(Hermit.SHADOW_MESO);
                             }
+                    } else if (ret.skill == Aran.BODY_PRESSURE) {
+                        if (monster != null) {
+                            int bodyPressureDmg = monster.getMaxHp() * SkillFactory.getSkill(Aran.BODY_PRESSURE).getEffect(ret.skilllevel).getDamage() / 100;
+                            if (bodyPressureDmg > calcDmgMax) {
+                                calcDmgMax = bodyPressureDmg;
+                            }
+                        }
                     }
             }
             
             for (int j = 0; j < ret.numDamage; j++) {
                     int damage = lea.readInt();
                     int hitDmgMax = calcDmgMax;
-                    if(ret.skill == Buccaneer.BARRAGE) {
+                    if(ret.skill == Buccaneer.BARRAGE || ret.skill == ThunderBreaker.BARRAGE) {
                         if(j > 3)
                             hitDmgMax *= Math.pow(2, (j - 3));
                     }
@@ -841,6 +851,8 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                     if(ret.skill == Marksman.SNIPE) {
                             damage = 195000 + Randomizer.nextInt(5000);
                             hitDmgMax = 200000;
+                    } else if (ret.skill == Beginner.BAMBOO_RAIN || ret.skill == Noblesse.BAMBOO_RAIN || ret.skill == Evan.BAMBOO_THRUST || ret.skill == Legend.BAMBOO_THRUST) {
+                        hitDmgMax = 82569000; // 30% of Max HP of strongest Dojo boss
                     }
 
                     int maxWithCrit = hitDmgMax;

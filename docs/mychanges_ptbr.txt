@@ -1547,3 +1547,117 @@ Resolvido casos onde pets equipados poderiam provocar inconsistências na DB ao 
 Revisado sistema de log por todo o código-fonte. Espera-se uma formatação similar para os vários logs.
 Corrigido pet excludes não sendo devidamente removidos ao retirar o pet da DB.
 Corrigido bug na expedição de Horntail ao tentar reentrar numa expedição já começada.
+
+07 Janeiro 2019,
+Corrigido petignores não sendo devidamente liberados da cache ao deletar pets, levando a possível leak na DB dos ignores.
+Revisado cash consumíveis sendo sempre retirado do primeiro slot em que aparece no inventário.
+Implementado comandos "pnpc" e "pmob".
+Revisado mecânica de eventos de RockSpirit, eliminando uso escasso de chamada de função de script em MapleMap.addPlayer().
+Removido finalização de evento ao sair de party em alguns eventos solo.
+Adicionado funções nos scripts de evento para todos os casos onde ainda faltava referência obrigatória.
+
+08 - 09 Janeiro 2019,
+Corrigido função de script revivePlayer sendo ativado mesmo ao usar Wheel of Destiny (uso indevido da função, que assume retorno usual do character para a cidade).
+Implementado comandos "pnpcremove" e "pmobremove".
+
+13 Janeiro 2019,
+Adicionado interação com NPC "Mom & Dad" na quest de noivado.
+Revisado problema com dispose em mapas de eventos ocorrendo muito cedo, havendo casos não previstos onde mapas ainda tendo alguma atividade levaria dispose.
+Corrigido scrolls de modificação de flags em equipamentos removendo slots quando não deveriam.
+
+14 Janeiro 2019,
+Implementado nova flag que permite evitar consumo compulsório de recursos via autopot de pets.
+Otimizado busca por nome de mobs em requisições de comando WhoDrops e provedor de info de mobs, agora utilizando cache.
+Implementado nova server flag para boss drop rate.
+Protegido concorrentemente sistema de comandos, assim evitando processamento em rajada de instanciações de comandos de um mesmo jogador.
+
+16 Janeiro 2019,
+Revisado login handler, trazendo métodos de desconexão para antes de checar LoginState, e não permitindo reatribuição de objeto-cliente para jogador já logado em canal.
+Revisado disconnect no login handler, agora devidamente finalizando sessões recém-criadas que falham em conectar jogador ao mundo.
+Revisado skill Monster Magnet, agora devidamente mostrando efeitos de skill.
+Mais uma tentativa de proteção contra acesso concorrente no login handler, buscando evitar múltiplas requisições concorrente por um accountId durante processo e múltiplas requisições de mesmo objeto de cliente.
+Revisado objeto das expedições, não mais permitindo armazenar objetos de jogadores (que já podem ter sido desativados).
+Corrigido expedições enviando pacotes para jogadores que estão fora de jogo.
+Normalizado mensagens de 1o job de NPCs explorers, com afirmação de mínimo de stats antes de checar requerimentos.
+
+18 Janeiro 2019,
+Corrigido dispose de interação com NPCs não devolvendo controle de certas ações ao jogador, mais notável quando a interação ocorreu automaticamente (jogador caminhou pra área de atuação).
+Removido pigs de Maple Island, já que o quiz de 3rd job sugere não há os mesmos lá. Cynical Orange Mushrooms passam a ocupar posições dos mesmos.
+Editado "launch.bat" para somente usar Java7, assim permitindo usuários a não terem que especificar preferência de uso de Java7 nas variáveis de ambiente PATH.
+
+20 Janeiro 2019,
+Corrigido necessidade de repetir aprovação dos mestres para realizar expedições de Zakum.
+Revisado comando goto. Jogadores tem acesso somente a mapas de cidade, GMs tem acesso a areas também.
+Implementado EXP rate específico para novatos de nível menor que 11.
+Revisado petid sendo setado fora de área de atuação (até então não compete setar isso após criado objeto de Item).
+
+21 - 24 Janeiro 2019,
+Corrigido sistema de guilds não atualizando corretamente tooltips de informação de guild de jogadores no mapa, para ampla quantidade de eventos com guilds (adicionar player na guild, trocar emblema, remover player, etc).
+Corrigido sistema de eventos permitindo entrada duplicada de eventos com mesmo nome nos registros do gerenciador de eventos, potencialmente levando a nulos em EIMs.
+Corrigido skill Hyper Body cancelando efeito do buff anterior ao reutilizar a skill, levando valores suficientemente grandes de HP corrente do jogador ao MaxHP base (MaxHP antes de utilizar a skill).
+Refatorado uso de evtLock para métodos que gerenciam expiração de quests, possívelmente resolvendo caso de deadlock no método de desistência de quests expiráveis.
+Revisado MoveLifeHandler, não mais propagando pacotes de movimentação de mobs vindas de jogadores que não são controladores.
+Refatorado completamente o sistema de aggro de mobs. Agora, métodos que atuam na atualização de aggros de mobs usam funções comuns.
+
+25 - 26 Janeiro 2019,
+Corrigido problema de acesso a ponteiro nulo ao realizar dispose no sistema de mapas das instâncias de eventos. Referência ao gerenciador de eventos já era nulo ao atingir tal método.
+Implementado retorno de estado de aggro para "sem aggro" se não houveram atividades de aggro num mob por algum tempo.
+Implementado checagem de aniversário ao adicionar itens de cash às lojas de player.
+Corrigido Hired Merchants não fechando devidamente ao abrir loja com itens de cash.
+Corrigido tooltip de Hired Merchant não atualizando para "indisponível" quando a loja está em manutenção.
+Corrigido tooltip de Player Shops não fechando corretamente se ainda havia visitantes na loja.
+Mais alguns ajustes no novo sistema de aggros. Nesta implementação aparentemente somente controladores processam ataques do tipo "areaWarning" de mobs.
+Corrigido função forceChangeMap não levando devidamente jogadores para o mapa dado como parâmetro, quando tal mapa é de instância de evento.
+Revisado comando de summon de jogadores, agora utilizando função padrão forceChangeMap, que lida com registro de jogadores em instâncias e coloca jogador no mapa alvo.
+Adicionado, no comando de summon de jogadores, habilidade de colocar jogadores em outros canais dentro do mapa de evento.
+
+27 - 29 Janeiro 2019,
+Corrigido custom AP autoassigner não utilizando devidamente os caps definidos no escopo do handler.
+Revisado custom AP autoassigner. Classes que usam DEX como atributo secundário para STR foram rebalanceados, de forma que o aumento no uso do atributo secundário permita melhores condições de ataque no jogo.
+Adicionado checagem de mesos em transações entre jogadores, lojas de jogador, ao receber itens de Duey e Fredrick.
+Adicionado checagem em quantidade de itens nas lojas e mercantes de jogadores, assim evitando bugs quando há mais itens a serem vendidos do que o esperado.
+Corrigido um exploit com mercantes, envolvendo chamada à DB antes de retirar item (que está sendo inserido na loja) do inventário do jogador.
+
+30 Janeiro 2019,
+Corrigido chamadas irregulares a "qm/cm" em scripts.
+
+31 Janeiro 2019,
+Com a ajuda de Irenex, adicionado referência a pet flags no criador de pacotes.
+Adicionado funcionalidade de quest que permite pets a andarem na velocidade do jogador.
+Corrigido quest repetível de Dragon Stone não apropriadamente recompensando o item ao jogador.
+Corrigido método de checagem de slots em MapleCharacter, agora utilizando o método padrão implementado especificamente para checagem de slots.
+
+01 Fevereiro 2019,
+Corrigido vulnerabilidade na ação de jogadores ao retornar para a cidade após reviver. Servidor poderia receber packet de dano e processá-lo legitimamente com o HP atualizado do jogador antes de enviá-lo de volta para cidade.
+
+04 - 05 Fevereiro 2019,
+Corrigido NPCs de portão em Mushking Empire permitindo jogadores acesso a área de bosses sem requisitos mínimos.
+Incrementado diálogos de permissão para realizar expedições contra Zakum.
+Modificado gerenciador de item scripts, agora referenciando conversação de NPCs (como previsto pelo WZ).
+Implementado limitação de mob summons, como previsto no WZ.
+Revisado fechamento de sessões no código-fonte não utilizando o coordenador de sessões para isto.
+Revisado sistema de login, agora automaticamente desconectando contas retidas no jogo quando DB determina que uma conta está disponível para login.
+Revisado Teleport Rocks, agora devidamente checando se é possível chegar ao mapa alvo (ou se há bloqueio de uso do item para esse mapa), além de certas checagens contra exploits com esse item.
+Corrigido agendamento de removeAfter de mobs atuando quando o mesmo já foi liberado.
+
+07 - 08 Fevereiro 2019,
+Corrigido ocorrências de NPE ao tentar registrar-se em instância de evento, quando existe uma outra instância que leva o mesmo nome em andamento.
+Tentativa de correção em todos os scripts de eventos, após ter atualizado o sistema de eventos para não mais ficar gerando instâncias livremente (agora, todas as instâncias orientadas-a-solo têm limite de acesso simultâneo entre jogadores).
+Corrigido lojas de jogadores e mercantes não aceitando itens em certos casos onde já se foi usado Scissors of Karma.
+Revisado novamente diversos scripts de evento, atentando às chamadas de função "setup" das mesmas.
+
+09 Fevereiro 2019,
+Tentativa de correção em sessões com exceptionCaught, já que aparentemente a sessão nem sempre é fechada pelo MINA automaticamente.
+Corrigido lista de guilds em alliances não sendo atualizado corretamente ao criar-se uma nova alliance. Era possível ver guilds de alianças passadas antes de ocorrer alguma atualização de packet em jogo que resolva isso.
+Implementado comando "toggleexp", que permite jogadores a escolher ganhar nível ou não se os mesmos não estivem em instância de evento.
+Nova ferramenta: MapleCashVegaChecker. Ferramenta busca por itens que supostamente deveriam permitir uso do Vega Scroll (segundo descrição) porém não o permitem.
+Revisado nomes de skill e mastery books, que mantinham números no nome da skill (agora padronizado com os outros livros).
+
+10 Fevereiro 2019,
+Editado requerimentos de level de medalhas level 200 para 180, assim evitando o problema onde nível das medalhas não apareçe na visão do cliente devido ao level cap.
+Corrigido puppets não tomando prioridade na nova mecânica de aggro.
+Incrementado mensagem custom de venda de produtos pelo mercante.
+
+13 - 14 Fevereiro 2019,
+Corrigido limites na função isWeapon, que não contabilizaria certos itens corretamente.
+Resolvido comportamento de puppets usando o novo sistema de aggro.

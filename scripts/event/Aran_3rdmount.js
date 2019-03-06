@@ -41,6 +41,14 @@ function init() {
     em.setProperty("noEntry","false");
 }
 
+function setup(level, lobbyid) {
+    var eim = em.newInstance("Aran_3rdmount_" + lobbyid);
+    eim.setProperty("level", level);
+    eim.setProperty("boss", "0");
+    
+    return eim;
+}
+
 function respawnStages(eim) {}
 
 function playerEntry(eim, player) {
@@ -115,3 +123,15 @@ function allMonstersDead(eim) {}
 function cancelSchedule() {}
 
 function dispose() {}
+
+
+// ---------- FILLER FUNCTIONS ----------
+
+function disbandParty(eim, player) {}
+
+function afterSetup(eim) {}
+
+function changedLeader(eim, leader) {}
+
+function leftParty(eim, player) {}
+

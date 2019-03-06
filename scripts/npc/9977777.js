@@ -47,6 +47,8 @@ function writeFeatureTab_PQs() {
         addFeature("Brand-new PQs: BossRushPQ, CafePQ.");
         addFeature("Mu Lung Dojo.");
         addFeature("Capt. Latanica with party fighting the boss.");
+        addFeature("Filled up missing obligatory event script methods.");
+        addFeature("Secured uniquety of active lobby-name instances.");
 }
 
 function writeFeatureTab_Skills() {
@@ -76,6 +78,7 @@ function writeFeatureTab_PlayerSocialNetwork() {
         addFeature("P. members' HPBar accounts HP gain on equips.");
         addFeature("Thoroughly reviewed P. Shops and H. Merchants.");
         addFeature("Transactions on Merchs instantly announced to owner.");
+        addFeature("Proper meso space check on player transactions.");
         addFeature("Game minirooms with functional pw system.");
         addFeature("Proper item pickup cooldown on non-owned items.");
         addFeature("Improved ranking system, with daily movement.");
@@ -90,6 +93,7 @@ function writeFeatureTab_CashItems() {
         addFeature("EXP/DROP/Cosmetic Coupons.");
         addFeature("EXP/DROP Coupon as buff effect during active time.");
         addFeature("Great deal of cash items functional.");
+        addFeature("Proper depletion of picked slot for usable cash items.");
         addFeature("Code coupons functional, with multi-items support.");
         addFeature("Merged unique ids for pets, rings and cash items.");
         addFeature("MapleTV mechanics stabilized and split by world.");
@@ -119,10 +123,13 @@ function writeFeatureTab_MonstersMapsReactors() {
         addFeature("Added meso drop data for many missing mobs.");
         addFeature("Monsterbook displays updated drop data info.");
         addFeature("Every skill/mastery book is now obtainable.");
+        addFeature("Enhanced aggro system: real-time DPS aggro detection.");
         addFeature("Mobs now can drop more than one of the same equip.");
         addFeature("Mobs only drop items collectable by the player/party.");
         addFeature("Mobs shouldn't fall from foothold too often now.");
+        addFeature("Puppets holds targeted mobs nearby on new aggro feat.");
         addFeature("Properly applying MP cost on non-skill mob moves.");
+        addFeature("Limited underling mob spawns.");
         addFeature("Implemented mob banish by touch & skill move.");
         addFeature("Redesigned HT mechanics: assemble & dmg taken.");
         addFeature("Implemented Zombify disease status.");
@@ -144,6 +151,7 @@ function writeFeatureTab_MonstersMapsReactors() {
         addFeature("Added world maps for M. Castle, W. Tour & Ellin areas.");
         addFeature("Added W. Tour & Masteria continents in the world map.");
         addFeature("Reviewed several issues with W. Map tooltips & links.");
+        addFeature("Continent separated global drops.");
         addFeature("Giant Cake boss drops s. bags and Maple items.");
 }
 
@@ -206,6 +214,7 @@ function writeFeatureTab_Serverpotentials() {
 
 function writeFeatureTab_Commands() {
         addFeature("Spawn Zakum/Horntail/Pinkbean.");
+        addFeature("Permanent NPCs & mobs.");
         addFeature("Several new commands.");
         addFeature("Rank command highlighting users by world or overall.");
         addFeature("Server commands layered by GM levels.");
@@ -247,10 +256,12 @@ function writeFeatureTab_Project() {
         addFeature("Improved login phase, using cache over DB queries.");
         addFeature("Protected many flaws with login management system.");
         addFeature("Developed a robust anti-exploit login coordinator.");
+        addFeature("Revised uniqueness aspect of logged in accounts.");
         addFeature("Usage of HikariCP to improve DB connection calls.");
         addFeature("Usage of Java Threadpool to improve runnable calls.");
         addFeature("Developed many survey tools for content profiling.");
         addFeature("Removed dangling item name throughout game files.");
+        addFeature("Remodeled item scripts, properly using NPC dialogs.");
         addFeature("ThreadTracker: runtime tool for deadlock detection.");
         addFeature("Channel, World and Server-wide timer management.");
         addFeature("Thoroughly reviewed encapsulation for player stats.");

@@ -605,6 +605,7 @@ public class MapleStatEffect {
                 case Buccaneer.BARRAGE:
                 case Gunslinger.BLANK_SHOT:
                 case DawnWarrior.COMA:
+                case ThunderBreaker.BARRAGE: 
                 case Aran.ROLLING_SPIN:
                 case Evan.FIRE_BREATH:
                 case Evan.BLAZE:
@@ -1035,7 +1036,7 @@ public class MapleStatEffect {
     }
 
     private void applyBuffEffect(MapleCharacter applyfrom, MapleCharacter applyto, boolean primary) {
-        if (!isMonsterRiding() && !isCouponBuff() && !isMysticDoor()) {     // last mystic door already dispelled if it has been used before.
+        if (!isMonsterRiding() && !isCouponBuff() && !isMysticDoor() && !isHyperBody()) {     // last mystic door already dispelled if it has been used before.
             applyto.cancelEffect(this, true, -1);
         }
 

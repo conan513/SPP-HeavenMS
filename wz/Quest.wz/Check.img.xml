@@ -8339,7 +8339,7 @@
       <int name="npc" value="12100"/>
       <imgdir name="mob">
         <imgdir name="0">
-          <int name="id" value="1210100"/>
+          <int name="id" value="9300274"/>
           <int name="count" value="2"/>
         </imgdir>
       </imgdir>
@@ -38562,6 +38562,9 @@
         <imgdir name="48">
           <int name="id" value="5000060"/>
         </imgdir>
+        <imgdir name="49">
+          <int name="id" value="5000066"/>
+        </imgdir>
       </imgdir>
     </imgdir>
     <imgdir name="1">
@@ -38735,6 +38738,9 @@
         </imgdir>
         <imgdir name="48">
           <int name="id" value="5000060"/>
+        </imgdir>
+        <imgdir name="49">
+          <int name="id" value="5000066"/>
         </imgdir>
       </imgdir>
     </imgdir>

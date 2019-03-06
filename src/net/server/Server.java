@@ -86,6 +86,7 @@ import constants.ItemConstants;
 import constants.GameConstants;
 import constants.ServerConstants;
 import java.util.TimeZone;
+import net.server.coordinator.MapleSessionCoordinator;
 import server.CashShop.CashItemFactory;
 import server.MapleSkillbookInformationProvider;
 import server.ThreadManager;
@@ -394,13 +395,14 @@ public class Server {
             int exprate = getWorldProperty(p, "exprate", i, ServerConstants.EXP_RATE);
             int mesorate = getWorldProperty(p, "mesorate", i, ServerConstants.MESO_RATE);
             int droprate = getWorldProperty(p, "droprate", i, ServerConstants.DROP_RATE);
+            int bossdroprate = getWorldProperty(p, "bossdroprate", i, ServerConstants.BOSS_DROP_RATE);
             int questrate = getWorldProperty(p, "questrate", i, ServerConstants.QUEST_RATE);
             int travelrate = getWorldProperty(p, "travelrate", i, ServerConstants.TRAVEL_RATE);
             
             World world = new World(i,
                     Integer.parseInt(p.getProperty("flag" + i)),
                     p.getProperty("eventmessage" + i),
-                    exprate, droprate, mesorate, questrate, travelrate);
+                    exprate, droprate, bossdroprate, mesorate, questrate, travelrate);
 
             worldRecommendedList.add(new Pair<>(i, p.getProperty("whyamirecommended" + i)));
             worlds.add(world);
@@ -783,7 +785,7 @@ public class Server {
                 worldQuery = (" AND `characters`.`world` >= 0 AND `characters`.`world` <= " + Math.abs(worldid));
             }
             
-            ps = con.prepareStatement("SELECT `characters`.`name`, `characters`.`level`, `characters`.`world` FROM `characters` LEFT JOIN accounts ON accounts.id = characters.accountid WHERE `characters`.`gm` < 2 AND `accounts`.`banned` = '0'" + worldQuery + " ORDER BY " + (!ServerConstants.USE_WHOLE_SERVER_RANKING ? "world, " : "") + "level DESC, exp DESC LIMIT 50");
+            ps = con.prepareStatement("SELECT `characters`.`name`, `characters`.`level`, `characters`.`world` FROM `characters` LEFT JOIN accounts ON accounts.id = characters.accountid WHERE `characters`.`gm` < 2 AND `accounts`.`banned` = '0'" + worldQuery + " ORDER BY " + (!ServerConstants.USE_WHOLE_SERVER_RANKING ? "world, " : "") + "level DESC, exp DESC, lastExpGainTime ASC LIMIT 50");
             rs = ps.executeQuery();
             
             if (!ServerConstants.USE_WHOLE_SERVER_RANKING) {
@@ -1692,7 +1694,7 @@ public class Server {
             if(c.isLoggedIn()) {
                 c.disconnect(false, false);
             } else {
-                c.getSession().close(true);
+                MapleSessionCoordinator.getInstance().closeSession(c.getSession(), true);
             }
         }
     }
@@ -1765,8 +1767,13 @@ public class Server {
         System.out.println("Worlds + Channels are offline.");
         acceptor.unbind();
         acceptor = null;
-        if (!restart) {
-            System.exit(0);
+        if (!restart) {  // shutdown hook deadlocks if System.exit() method is used within its body chores, thanks MIKE for pointing that out
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    System.exit(0);
+                }
+            }).start();
         } else {
             System.out.println("\r\nRestarting the server....\r\n");
             try {

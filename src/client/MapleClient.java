@@ -175,22 +175,22 @@ public class MapleClient {
 		return chars;
 	}
 
-	public List<String> loadCharacterNames(int serverId) {
+	public List<String> loadCharacterNames(int worldId) {
 		List<String> chars = new ArrayList<>(15);
-		for (CharNameAndId cni : loadCharactersInternal(serverId)) {
+		for (CharNameAndId cni : loadCharactersInternal(worldId)) {
 			chars.add(cni.name);
 		}
 		return chars;
 	}
 
-	private List<CharNameAndId> loadCharactersInternal(int serverId) {
+	private List<CharNameAndId> loadCharactersInternal(int worldId) {
 		PreparedStatement ps;
 		List<CharNameAndId> chars = new ArrayList<>(15);
 		try {
                         Connection con = DatabaseConnection.getConnection();
 			ps = con.prepareStatement("SELECT id, name FROM characters WHERE accountid = ? AND world = ?");
 			ps.setInt(1, this.getAccID());
-			ps.setInt(2, serverId);
+			ps.setInt(2, worldId);
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
 					chars.add(new CharNameAndId(rs.getString("name"), rs.getInt("id")));
@@ -517,11 +517,15 @@ public class MapleClient {
 	}
 
 	public int login(String login, String pwd, String nibbleHwid) {
-		loginattempt++;
-		if (loginattempt > 4) {
-			MapleSessionCoordinator.getInstance().closeSession(session, false);
-		}
 		int loginok = 5;
+                
+		loginattempt++;
+                if (loginattempt > 4) {
+                        loggedIn = false;
+			MapleSessionCoordinator.getInstance().closeSession(session, false);
+                        return loginok;
+		}
+		
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -748,7 +752,12 @@ public class MapleClient {
 		return accId;
 	}
         
-	public void updateLoginState(int newstate) {
+        public void updateLoginState(int newstate) {
+                // rules out possibility of multiple account entries
+                if (newstate == LOGIN_LOGGEDIN) {
+                        MapleSessionCoordinator.getInstance().updateOnlineSession(this.getSession());
+                }
+                
 		try {
                         Connection con = DatabaseConnection.getConnection();
 			try (PreparedStatement ps = con.prepareStatement("UPDATE accounts SET loggedin = ?, lastlogin = ? WHERE id = ?")) {
@@ -763,6 +772,7 @@ public class MapleClient {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+                
 		if (newstate == LOGIN_NOTLOGGEDIN) {
 			loggedIn = false;
 			serverTransition = false;
@@ -797,9 +807,6 @@ public class MapleClient {
                                         MapleSessionCoordinator.getInstance().closeSession(session, null);
 					updateLoginState(LOGIN_NOTLOGGEDIN);
 				}
-			} else if (state == LOGIN_LOGGEDIN && player == null) {
-				state = LOGIN_LOGGEDIN;
-				updateLoginState(LOGIN_LOGGEDIN);
 			}
 			rs.close();
 			ps.close();
@@ -882,7 +889,7 @@ public class MapleClient {
 	}
 
         public final void disconnect(final boolean shutdown, final boolean cashshop) {
-                if (isDisconnecting()) {
+                if (canDisconnect()) {
                         ThreadManager.getInstance().newTask(new Runnable() {
                                 @Override
                                 public void run() {
@@ -893,12 +900,12 @@ public class MapleClient {
         }
         
         public final void forceDisconnect() {
-                if (isDisconnecting()) {
+                if (canDisconnect()) {
                         disconnectInternal(true, false);
                 }
         }
         
-        private synchronized boolean isDisconnecting() {
+        private synchronized boolean canDisconnect() {
                 if (disconnecting) {
 			return false;
 		}
@@ -989,6 +996,11 @@ public class MapleClient {
 			
                         clear();
 		} else {
+                        if (session.containsAttribute(MapleClient.CLIENT_KEY)) {
+                                MapleSessionCoordinator.getInstance().closeSession(session, false);
+                                session.removeAttribute(MapleClient.CLIENT_KEY);
+                        }
+                    
                         engines.clear();
                 }
 	}
@@ -1001,8 +1013,7 @@ public class MapleClient {
             
                 Server.getInstance().unregisterLoginState(this);
             
-                this.session.setAttribute(MapleClient.CLIENT_KEY, null);
-		this.accountName = null;
+                this.accountName = null;
 		this.macs = null;
 		this.hwid = null;
 		this.birthday = null;
@@ -1149,12 +1160,12 @@ public class MapleClient {
 		int points = 0;
 		try {
                         Connection con = DatabaseConnection.getConnection();
-			PreparedStatement ps = con.prepareStatement("SELECT `votes` FROM accounts WHERE id = ?");
+			PreparedStatement ps = con.prepareStatement("SELECT `votepoints` FROM accounts WHERE id = ?");
 			ps.setInt(1, accId);
 			ResultSet rs = ps.executeQuery();
 
 			if (rs.next()) {
-				points = rs.getInt("votes");
+				points = rs.getInt("votepoints");
 			}
 			ps.close();
 			rs.close();
@@ -1185,7 +1196,7 @@ public class MapleClient {
 	private void saveVotePoints() {
 		try {
 			Connection con = DatabaseConnection.getConnection();
-			try (PreparedStatement ps = con.prepareStatement("UPDATE accounts SET votes = ? WHERE id = ?")) {
+			try (PreparedStatement ps = con.prepareStatement("UPDATE accounts SET votepoints = ? WHERE id = ?")) {
 				ps.setInt(1, votePoints);
 				ps.setInt(2, accId);
 				ps.executeUpdate();

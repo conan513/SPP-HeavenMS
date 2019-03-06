@@ -87,22 +87,15 @@ public class MapleServerHandler extends IoHandlerAdapter {
     }
     
     @Override
-    public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-        if (cause instanceof org.apache.mina.core.write.WriteToClosedSessionException) {
-            return;
-        }
-        
-        /*
-    	System.out.println("disconnect by exception");
-        cause.printStackTrace();
-        */
-        
-        if (cause instanceof IOException || cause instanceof ClassCastException) {
-            return;
-        }
-        MapleClient mc = (MapleClient) session.getAttribute(MapleClient.CLIENT_KEY);
-        if (mc != null && mc.getPlayer() != null) {
-            FilePrinter.printError(FilePrinter.EXCEPTION_CAUGHT, cause, "Exception caught by: " + mc.getPlayer());
+    public void exceptionCaught(IoSession session, Throwable cause) {
+        if (cause instanceof IOException) {
+            closeMapleSession(session);
+        } else {
+            MapleClient client = (MapleClient) session.getAttribute(MapleClient.CLIENT_KEY);
+            
+            if (client != null && client.getPlayer() != null) {
+                FilePrinter.printError(FilePrinter.EXCEPTION_CAUGHT, cause, "Exception caught by: " + client.getPlayer());
+            }
         }
     }
 
@@ -144,8 +137,7 @@ public class MapleServerHandler extends IoHandlerAdapter {
         session.setAttribute(MapleClient.CLIENT_KEY, client);
     }
 
-    @Override
-    public void sessionClosed(IoSession session) throws Exception {
+    private void closeMapleSession(IoSession session) {
         if (isLoginServerHandler()) {
             MapleSessionCoordinator.getInstance().closeLoginSession(session);
         } else {
@@ -164,10 +156,15 @@ public class MapleServerHandler extends IoHandlerAdapter {
                 FilePrinter.printError(FilePrinter.ACCOUNT_STUCK, t);
             } finally {
                 session.close();
-                session.removeAttribute(MapleClient.CLIENT_KEY);      
+                session.removeAttribute(MapleClient.CLIENT_KEY);
                 //client.empty();
             }
         }
+    }
+    
+    @Override
+    public void sessionClosed(IoSession session) throws Exception {
+        closeMapleSession(session);
         super.sessionClosed(session);
     }
 

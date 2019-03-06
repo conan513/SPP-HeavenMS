@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `email` varchar(45) DEFAULT NULL,
   `ip` text,
   `rewardpoints` int(11) NOT NULL DEFAULT '0',
+  `votepoints` int(11) NOT NULL DEFAULT '0',
   `hwid` varchar(12) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
@@ -180,6 +181,7 @@ CREATE TABLE IF NOT EXISTS `characters` (
   `PQPoints` int(11) NOT NULL DEFAULT '0',
   `dataString` varchar(64) NOT NULL DEFAULT '',
   `lastLogoutTime` timestamp NOT NULL DEFAULT '2015-01-01 05:00:00',
+  `lastExpGainTime` timestamp NOT NULL DEFAULT '2015-01-01 05:00:00',
   `pendantExp` tinyint(1) NOT NULL DEFAULT '0',
   `jailexpire` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -12775,8 +12777,7 @@ INSERT IGNORE INTO `temp_data` (`id`, `dropperid`, `itemid`, `minimum_quantity`,
 
 CREATE TABLE IF NOT EXISTS `drop_data_global` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `continent` int(11) NOT NULL,
-  `dropType` tinyint(1) NOT NULL DEFAULT '0',
+  `continent` tinyint(1) NOT NULL DEFAULT '-1',
   `itemid` int(11) NOT NULL DEFAULT '0',
   `minimum_quantity` int(11) NOT NULL DEFAULT '1',
   `maximum_quantity` int(11) NOT NULL DEFAULT '1',
@@ -12787,12 +12788,12 @@ CREATE TABLE IF NOT EXISTS `drop_data_global` (
   KEY `mobid` (`continent`) USING BTREE
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=5 ;
 
-INSERT INTO `drop_data_global` (`id`, `continent`, `dropType`, `itemid`, `minimum_quantity`, `maximum_quantity`, `questid`, `chance`, `comments`) VALUES
-(1, 0, 0, 4031865, 1, 1, 0, 35000, 'NX Card 100 PTS'),
-(2, 0, 0, 4031866, 1, 1, 0, 20000, 'NX Card 250 PTS'),
-(3, 0, 0, 4001126, 1, 2, 0, 8000, 'Maple Leaves'),
-(4, 0, 0, 2049100, 1, 1, 0, 1200, 'Chaos Scroll 60%'),
-(5, 0, 0, 4001006, 1, 1, 0, 10000, 'Flaming Feather');
+INSERT INTO `drop_data_global` (`id`, `continent`, `itemid`, `minimum_quantity`, `maximum_quantity`, `questid`, `chance`, `comments`) VALUES
+(1, -1, 4031865, 1, 1, 0, 35000, 'NX Card 100 PTS'),
+(2, -1, 4031866, 1, 1, 0, 20000, 'NX Card 250 PTS'),
+(3, -1, 4001126, 1, 2, 0, 8000, 'Maple Leaves'),
+(4, -1, 2049100, 1, 1, 0, 1200, 'Chaos Scroll 60%'),
+(5, -1, 4001006, 1, 1, 0, 10000, 'Flaming Feather');
 
 CREATE TABLE IF NOT EXISTS `dueyitems` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -16458,6 +16459,7 @@ CREATE TABLE IF NOT EXISTS `pets` (
   `closeness` int(10) unsigned NOT NULL,
   `fullness` int(10) unsigned NOT NULL,
   `summoned` tinyint(1) NOT NULL DEFAULT '0',
+  `flag` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`petid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
@@ -16516,6 +16518,25 @@ CREATE TABLE IF NOT EXISTS `playernpcs_field` (
   `map` int(11) NOT NULL,
   `step` tinyint(1) NOT NULL DEFAULT '0',
   `podium` smallint(8) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+CREATE TABLE IF NOT EXISTS `plife` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `world` int(11) NOT NULL DEFAULT '-1',
+  `map` int(11) NOT NULL DEFAULT '0',
+  `life` int(11) NOT NULL DEFAULT '0',
+  `type` varchar(1) NOT NULL DEFAULT 'n',
+  `cy` int(11) NOT NULL DEFAULT '0',
+  `f` int(11) NOT NULL DEFAULT '0',
+  `fh` int(11) NOT NULL DEFAULT '0',
+  `rx0` int(11) NOT NULL DEFAULT '0',
+  `rx1` int(11) NOT NULL DEFAULT '0',
+  `x` int(11) NOT NULL DEFAULT '0',
+  `y` int(11) NOT NULL DEFAULT '0',
+  `hide` int(11) NOT NULL DEFAULT '0',
+  `mobtime` int(11) NOT NULL DEFAULT '0',
+  `team` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 

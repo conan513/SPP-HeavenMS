@@ -41,19 +41,31 @@ public class GotoCommand extends Command {
 
     @Override
     public void execute(MapleClient c, String[] params) {
-        final HashMap<String, Integer> gotomaps = GameConstants.GOTO_MAPS;
-
         MapleCharacter player = c.getPlayer();
         if (params.length < 1){
             player.yellowMessage("Syntax: @goto <map name>");
             return;
         }
-
-        if (player.getEventInstance() != null || MapleMiniDungeonInfo.isDungeonMap(player.getMapId()) || FieldLimit.CANNOTMIGRATE.check(player.getMap().getFieldLimit()) || !player.isAlive()) {
-            player.dropMessage(1, "This command can not be used in this map.");
+        
+        if (!player.isAlive()) {
+            player.dropMessage(1, "This command cannot be used when you're dead.");
             return;
         }
 
+        if (!player.isGM()) {
+            if (player.getEventInstance() != null || MapleMiniDungeonInfo.isDungeonMap(player.getMapId()) || FieldLimit.CANNOTMIGRATE.check(player.getMap().getFieldLimit())) {
+                player.dropMessage(1, "This command can not be used in this map.");
+                return;
+            }
+        }
+
+        HashMap<String, Integer> gotomaps;
+        if (player.isGM()) {
+            gotomaps = new HashMap<>(GameConstants.GOTO_AREAS);     // distinct map registry for GM/users suggested thanks to Vcoc
+        } else {
+            gotomaps = new HashMap<>(GameConstants.GOTO_TOWNS);
+        }
+        
         if (gotomaps.containsKey(params[0])) {
             MapleMap target = c.getChannelServer().getMapFactory().getMap(gotomaps.get(params[0]));
             

@@ -28,6 +28,8 @@ import client.MapleClient;
 import client.MapleCharacter;
 import server.maps.MapleMap;
 
+import java.util.Collection;
+
 public class ReloadMapCommand extends Command {
     {
         setDescription("");
@@ -36,11 +38,12 @@ public class ReloadMapCommand extends Command {
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
-        MapleMap oldMap = c.getPlayer().getMap();
         MapleMap newMap = c.getChannelServer().getMapFactory().resetMap(player.getMapId());
         int callerid = c.getPlayer().getId();
 
-        for (MapleCharacter chr : oldMap.getCharacters()) {
+        Collection<MapleCharacter> characters = player.getMap().getAllPlayers();
+        
+        for (MapleCharacter chr : characters) {
             chr.saveLocationOnWarp();
             chr.changeMap(newMap);
             if (chr.getId() != callerid)

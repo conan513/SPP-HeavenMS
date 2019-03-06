@@ -112,7 +112,7 @@ public class MapleItemInformationProvider {
     protected Map<Integer, Integer> monsterBookID = new HashMap<>();
     protected Map<Integer, Boolean> untradeableCache = new HashMap<>();
     protected Map<Integer, Boolean> onEquipUntradeableCache = new HashMap<>();
-    protected Map<Integer, scriptedItem> scriptedItemCache = new HashMap<>();
+    protected Map<Integer, ScriptedItem> scriptedItemCache = new HashMap<>();
     protected Map<Integer, Boolean> karmaCache = new HashMap<>();
     protected Map<Integer, Integer> triggerItemCache = new HashMap<>();
     protected Map<Integer, Integer> expCache = new HashMap<>();
@@ -993,13 +993,13 @@ public class MapleItemInformationProvider {
                             break;
                     }
                     if (!ItemConstants.isCleanSlate(scrollId)) {
-                        if (!assertGM) {
+                        if (!assertGM && !ItemConstants.isModifierScroll(scrollId)) {   // issue with modifier scrolls taking slots found thanks to Masterrulax, justin, BakaKnyx
                             nEquip.setUpgradeSlots((byte) (nEquip.getUpgradeSlots() - 1));
                         }
                         nEquip.setLevel((byte) (nEquip.getLevel() + 1));
                     }
                 } else {
-                    if (!ServerConstants.USE_PERFECT_SCROLLING && !usingWhiteScroll && !ItemConstants.isCleanSlate(scrollId) && !assertGM) {
+                    if (!ServerConstants.USE_PERFECT_SCROLLING && !usingWhiteScroll && !ItemConstants.isCleanSlate(scrollId) && !assertGM && !ItemConstants.isModifierScroll(scrollId)) {
                         nEquip.setUpgradeSlots((byte) (nEquip.getUpgradeSlots() - 1));
                     }
                     if (Randomizer.nextInt(100) < stats.get("cursed")) {
@@ -1447,14 +1447,14 @@ public class MapleItemInformationProvider {
         return untradeableOnEquip;
     }
 
-    public scriptedItem getScriptedItemInfo(int itemId) {
+    public ScriptedItem getScriptedItemInfo(int itemId) {
         if (scriptedItemCache.containsKey(itemId)) {
             return scriptedItemCache.get(itemId);
         }
         if ((itemId / 10000) != 243) {
             return null;
         }
-        scriptedItem script = new scriptedItem(MapleDataTool.getInt("spec/npc", getItemData(itemId), 0),
+        ScriptedItem script = new ScriptedItem(MapleDataTool.getInt("spec/npc", getItemData(itemId), 0),
         MapleDataTool.getString("spec/script", getItemData(itemId), ""),
         MapleDataTool.getInt("spec/runOnPickup", getItemData(itemId), 0) == 1);
         scriptedItemCache.put(itemId, script);
@@ -2055,7 +2055,7 @@ public class MapleItemInformationProvider {
             ps.setInt(1, itemId);
             ResultSet rs = ps.executeQuery();
             while(rs.next()) {
-                String resultName = MapleMonsterInformationProvider.getMobNameFromId(rs.getInt("dropperid"));
+                String resultName = MapleMonsterInformationProvider.getInstance().getMobNameFromId(rs.getInt("dropperid"));
                 if (resultName != null) {
                     list.add(resultName);
                 }
@@ -2100,13 +2100,13 @@ public class MapleItemInformationProvider {
         return skillbook;
     }
 
-    public class scriptedItem {
+    public class ScriptedItem {
 
         private boolean runOnPickup;
         private int npc;
         private String script;
 
-        public scriptedItem(int npc, String script, boolean rop) {
+        public ScriptedItem(int npc, String script, boolean rop) {
             this.npc = npc;
             this.script = script;
             this.runOnPickup = rop;

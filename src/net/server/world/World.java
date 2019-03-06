@@ -94,7 +94,7 @@ import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
  */
 public class World {
 
-    private int id, flag, exprate, droprate, mesorate, questrate, travelrate;
+    private int id, flag, exprate, droprate, bossdroprate, mesorate, questrate, travelrate;
     private String eventmsg;
     private List<Channel> channels = new ArrayList<>();
     private Map<Integer, Byte> pnpcStep = new HashMap<>();
@@ -158,12 +158,13 @@ public class World {
     private ScheduledFuture<?> charactersSchedule;
     private ScheduledFuture<?> marriagesSchedule;
     
-    public World(int world, int flag, String eventmsg, int exprate, int droprate, int mesorate, int questrate, int travelrate) {
+    public World(int world, int flag, String eventmsg, int exprate, int droprate, int bossdroprate, int mesorate, int questrate, int travelrate) {
         this.id = world;
         this.flag = flag;
         this.eventmsg = eventmsg;
         this.exprate = exprate;
         this.droprate = droprate;
+        this.bossdroprate = bossdroprate;
         this.mesorate = mesorate;
         this.questrate = questrate;
         this.travelrate = travelrate;
@@ -292,7 +293,7 @@ public class World {
     }
 
     public void setExpRate(int exp) {
-        List<MapleCharacter> list = new LinkedList<>(getPlayerStorage().getAllCharacters());
+        Collection<MapleCharacter> list = getPlayerStorage().getAllCharacters();
         
         for(MapleCharacter chr : list) {
             if(!chr.isLoggedin()) continue;
@@ -310,7 +311,7 @@ public class World {
     }
 
     public void setDropRate(int drop) {
-        List<MapleCharacter> list = new LinkedList<>(getPlayerStorage().getAllCharacters());
+        Collection<MapleCharacter> list = getPlayerStorage().getAllCharacters();
         
         for(MapleCharacter chr : list) {
             if(!chr.isLoggedin()) continue;
@@ -322,14 +323,22 @@ public class World {
             chr.setWorldRates();
         }
     }
+    
+    public int getBossDropRate() {  // boss rate concept thanks to Lapeiro
+        return bossdroprate;
+    }
+    
+    public void setBossDropRate(int bossdrop) {
+        bossdroprate = bossdrop;
+    }
 
     public int getMesoRate() {
         return mesorate;
     }
 
     public void setMesoRate(int meso) {
-        List<MapleCharacter> list = new LinkedList<>(getPlayerStorage().getAllCharacters());
-        
+        Collection<MapleCharacter> list = getPlayerStorage().getAllCharacters();
+
         for(MapleCharacter chr : list) {
             if(!chr.isLoggedin()) continue;
             chr.revertWorldRates();
@@ -603,7 +612,15 @@ public class World {
             mc.saveGuildStatus();
         }
         if (bDifferentGuild) {
-            mc.broadcastStance();
+            if (mc.isLoggedinWorld()) {
+                MapleGuild guild = Server.getInstance().getGuild(guildid);
+                if (guild != null) {
+                    mc.getMap().broadcastMessage(mc, MaplePacketCreator.guildNameChanged(cid, guild.getName()));
+                    mc.getMap().broadcastMessage(mc, MaplePacketCreator.guildMarkChanged(cid, guild));
+                } else {
+                    mc.getMap().broadcastMessage(mc, MaplePacketCreator.guildNameChanged(cid, ""));
+                }
+            }
         }
     }
 
